@@ -9,27 +9,14 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ('Extra Details', {
             'fields': (
-                'full_name',
-                'mobile_no',
-                'dob',
-                'address',
-                'alternate_mobile_no',
-                'profile_image',
-                'gender',
+                'full_name', 'mobile_no', 'dob', 'address', 'alternate_mobile_no', 'profile_image', 'gender',
             )
         }),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
         ('Extra Details', {
             'fields': (
-                'full_name',
-                'email',
-                'mobile_no',
-                'dob',
-                'address',
-                'alternate_mobile_no',
-                'profile_image',
-                'gender',
+                'full_name', 'email','mobile_no','dob','address','alternate_mobile_no','profile_image','gender',
             )
         }),
     )
