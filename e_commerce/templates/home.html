@@ -1,5 +1,73 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home | Flipkart Pro{% endblock %}
 
-{% block content %}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="home-slider" aria-label="Home slider">
+    {% if slider_images %}
+        <div
+            id="carouselExampleDark"
+            class="carousel slide carousel-fade shadow-lg"
+            data-bs-ride="carousel"
+            data-bs-interval="3000"
+            data-bs-pause="false">
+            <div class="carousel-indicators">
+                {% for slider in slider_images %}
+                    <button
+                        type="button"
+                        data-bs-target="#carouselExampleDark"
+                        data-bs-slide-to="{{ forloop.counter0 }}"
+                        class="{% if forloop.first %}active{% endif %}"
+                        {% if forloop.first %}aria-current="true"{% endif %}
+                        aria-label="Slide {{ forloop.counter }}">
+                    </button>
+                {% endfor %}
+            </div>
+
+            <div class="carousel-inner">
+                {% for slider in slider_images %}
+                    <div class="carousel-item{% if forloop.first %} active{% endif %}" data-bs-interval="3000">
+                        <img src="{{ slider.image.url }}" class="d-block w-100" alt="Slider image {{ forloop.counter }}">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>Flipkart Pro</h5>
+                            <p>Fresh deals and collections for you.</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    {% else %}
+        <div class="slider-empty">
+            <h1>Flipkart Pro</h1>
+            <p>Add slider images from admin panel to show them here.</p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const homeCarousel = document.querySelector('#carouselExampleDark');
+
+    if (homeCarousel) {
+        new bootstrap.Carousel(homeCarousel, {
+            interval: 3000,
+            ride: 'carousel'
+        });
+    }
+</script>
+{% endblock %}

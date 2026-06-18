@@ -1,0 +1,130 @@
+.home-slider {
+    width: 100%;
+}
+
+.home-slider .carousel {
+    width: 100%;
+    height: 420px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #111827;
+}
+
+.home-slider .carousel-inner,
+.home-slider .carousel-item {
+    height: 100%;
+}
+
+.home-slider .carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.home-slider .carousel-item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.48), rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.3));
+    pointer-events: none;
+}
+
+.home-slider .carousel-caption {
+    right: auto;
+    bottom: 56px;
+    left: 56px;
+    z-index: 2;
+    max-width: 430px;
+    padding: 0;
+    text-align: left;
+    color: #ffffff;
+}
+
+.home-slider .carousel-caption h5 {
+    margin-bottom: 8px;
+    font-size: 34px;
+    font-weight: 700;
+}
+
+.home-slider .carousel-caption p {
+    margin: 0;
+    font-size: 17px;
+}
+
+.home-slider .carousel-control-prev,
+.home-slider .carousel-control-next {
+    width: 48px;
+    height: 48px;
+    top: 50%;
+    margin: 0 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.86);
+    opacity: 1;
+    transform: translateY(-50%);
+}
+
+.home-slider .carousel-control-prev-icon,
+.home-slider .carousel-control-next-icon {
+    filter: invert(1) grayscale(100);
+}
+
+.home-slider .carousel-indicators {
+    margin-bottom: 18px;
+}
+
+.home-slider .carousel-indicators [data-bs-target] {
+    width: 28px;
+    height: 5px;
+    border: 0;
+    border-radius: 999px;
+    background-color: #ffffff;
+    opacity: 0.55;
+}
+
+.home-slider .carousel-indicators .active {
+    opacity: 1;
+}
+
+.slider-empty {
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px dashed #ced4da;
+    color: #495057;
+}
+
+.slider-empty h1 {
+    margin-bottom: 8px;
+    font-size: 32px;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.slider-empty p {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .home-slider .carousel {
+        height: 280px;
+    }
+
+    .home-slider .carousel-control-prev,
+    .home-slider .carousel-control-next {
+        width: 40px;
+        height: 40px;
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-slider .carousel {
+        height: 210px;
+    }
+}

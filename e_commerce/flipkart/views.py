@@ -5,13 +5,15 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models import Prefetch
 from django.shortcuts import redirect, render
 
-from .models import CustomUser
+from .models import Category, CustomUser, Product, sliderImage
 
 
 def home(request):
-    return render(request, 'home.html')
+    slider_images = sliderImage.objects.all().order_by('id')
+    return render(request, 'home.html', {'slider_images': slider_images})
 
 
 def product(request):
@@ -19,7 +21,14 @@ def product(request):
 
 
 def category(request):
-    return render(request, 'category.html')
+    categories = Category.objects.filter(is_active=True).prefetch_related(
+        Prefetch(
+            'product_set',
+            queryset=Product.objects.filter(is_active=True).order_by('-created_at'),
+            to_attr='active_products',
+        )
+    ).order_by('name')
+    return render(request, 'category.html', {'categories': categories})
 
 
 def gallery(request):
