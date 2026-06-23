@@ -6,28 +6,44 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Prefetch
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Category, CustomUser, Product, sliderImage
 
 
-def home(request):
-    slider_images = sliderImage.objects.all().order_by('id')
-    return render(request, 'home.html', {'slider_images': slider_images})
-
-
-def product(request):
-    return render(request, 'product.html')
-
-
-def category(request):
-    categories = Category.objects.filter(is_active=True).prefetch_related(
+def get_categories_with_products():
+    return Category.objects.filter(is_active=True).prefetch_related(
         Prefetch(
             'product_set',
             queryset=Product.objects.filter(is_active=True).order_by('-created_at'),
             to_attr='active_products',
         )
     ).order_by('name')
+
+
+def home(request):
+    slider_images = sliderImage.objects.all().order_by('id')
+    categories = get_categories_with_products()
+    return render(request, 'home.html', {
+        'slider_images': slider_images,
+        'categories': categories,
+    })
+
+
+def product(request):
+    categories = get_categories_with_products()
+    uncategorized_products = Product.objects.filter(
+        category__isnull=True,
+        is_active=True,
+    ).order_by('-created_at')
+    return render(request, 'product.html', {
+        'categories': categories,
+        'uncategorized_products': uncategorized_products,
+    })
+
+
+def category(request):
+    categories = get_categories_with_products()
     return render(request, 'category.html', {'categories': categories})
 
 
@@ -44,7 +60,47 @@ def wishlist(request):
 
 
 def cart(request):
-    return render(request, 'cart.html')
+    cart_data = request.session.get('cart', {})
+    products = Product.objects.filter(id__in=cart_data.keys(), is_active=True)
+    cart_items = []
+    total = 0
+
+    for product_item in products:
+        quantity = cart_data.get(str(product_item.id), 0)
+        subtotal = product_item.price * quantity
+        total += subtotal
+        cart_items.append({
+            'product': product_item,
+            'quantity': quantity,
+            'subtotal': subtotal,
+        })
+
+    return render(request, 'cart.html', {
+        'cart_items': cart_items,
+        'total': total,
+    })
+
+
+def add_to_cart(request, product_id):
+    product_item = get_object_or_404(Product, id=product_id, is_active=True)
+    cart_data = request.session.get('cart', {})
+    product_key = str(product_item.id)
+    cart_data[product_key] = cart_data.get(product_key, 0) + 1
+    request.session['cart'] = cart_data
+    request.session.modified = True
+    messages.success(request, f'{product_item.name} added to cart.')
+    return redirect(request.POST.get('next') or 'product')
+
+
+def buy_now(request, product_id):
+    product_item = get_object_or_404(Product, id=product_id, is_active=True)
+    cart_data = request.session.get('cart', {})
+    product_key = str(product_item.id)
+    cart_data[product_key] = cart_data.get(product_key, 0) + 1
+    request.session['cart'] = cart_data
+    request.session.modified = True
+    messages.success(request, f'{product_item.name} is ready to buy.')
+    return redirect('cart')
 
 
 def my_profile(request):
