@@ -5,4 +5,43 @@
 {% block poster_title %}My Profile{% endblock %}
 {% block poster_subtitle %}Manage your personal details and shopping preferences.{% endblock %}
 
-{% block content %}{% endblock %}
+{% block content %}
+<div class="py-4">
+	{% if request.user.is_authenticated %}
+		<div class="card p-4">
+			<div class="d-flex align-items-center gap-3 mb-3">
+				{% if request.user.profile_image %}
+					<img src="{{ request.user.profile_image.url }}" alt="Profile" class="rounded-circle" style="width:80px;height:80px;object-fit:cover;">
+				{% endif %}
+				<div>
+					<h4>{{ request.user.full_name }}</h4>
+					<p class="mb-0">@{{ request.user.username }}</p>
+					<p class="mb-0">{{ request.user.email }}</p>
+				</div>
+			</div>
+
+			<dl class="row">
+				<dt class="col-sm-3">Mobile</dt>
+				<dd class="col-sm-9">{{ request.user.mobile_no }}</dd>
+
+				<dt class="col-sm-3">Alternate Mobile</dt>
+				<dd class="col-sm-9">{{ request.user.alternate_mobile_no }}</dd>
+
+				<dt class="col-sm-3">DOB</dt>
+				<dd class="col-sm-9">{{ request.user.dob }}</dd>
+
+				<dt class="col-sm-3">Gender</dt>
+				<dd class="col-sm-9">{{ request.user.gender }}</dd>
+
+				<dt class="col-sm-3">Address</dt>
+				<dd class="col-sm-9">{{ request.user.address }}</dd>
+			</dl>
+
+			<a class="btn btn-primary" href="{% url 'edit_profile' %}">Edit Profile</a>
+		</div>
+	{% else %}
+		<p>Please <a href="{% url 'login' %}">login</a> to view your profile.</p>
+	{% endif %}
+</div>
+{% endblock %}
+

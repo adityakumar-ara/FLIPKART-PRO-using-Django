@@ -40,6 +40,18 @@ class Category(models.Model):
         return self.name
 
 
+class Announcement(models.Model):
+    title = models.CharField(max_length=200, blank=True)
+    message = models.TextField()
+    is_active = models.BooleanField(default=True)
+    start_at = models.DateTimeField(null=True, blank=True)
+    end_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title or (self.message[:75] + ('...' if len(self.message) > 75 else ''))
+
+
 class Product(models.Model):
     name = models.CharField(max_length=150)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)

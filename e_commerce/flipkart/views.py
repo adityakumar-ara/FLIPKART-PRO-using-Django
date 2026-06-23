@@ -9,6 +9,8 @@ from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Category, CustomUser, Product, sliderImage
+from django.forms import modelform_factory
+from django.contrib.auth.decorators import login_required
 
 
 def get_categories_with_products():
@@ -252,3 +254,52 @@ def login_view(request):
         return redirect('/')
 
     return render(request, 'login.html')
+
+
+def quick_links(request):
+    return render(request, 'quick_links.html')
+
+
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')
+
+
+def refund_policy(request):
+    return render(request, 'refund_policy.html')
+
+
+def shipping_policy(request):
+    return render(request, 'shipping_policy.html')
+
+
+def terms_conditions(request):
+    return render(request, 'terms_and_conditions.html')
+
+
+def our_mission(request):
+    return render(request, 'our_mission.html')
+
+
+def our_vision(request):
+    return render(request, 'our_vision.html')
+
+
+@login_required
+def edit_profile(request):
+    user = request.user
+    form_class = modelform_factory(
+        CustomUser,
+        fields=[
+            'username', 'full_name', 'email', 'mobile_no', 'dob', 'address',
+            'alternate_mobile_no', 'profile_image', 'gender',
+        ],
+    )
+    if request.method == 'POST':
+        form = form_class(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('my_profile')
+    else:
+        form = form_class(instance=user)
+    return render(request, 'edit_profile.html', {'form': form})

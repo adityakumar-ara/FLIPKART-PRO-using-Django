@@ -10,6 +10,18 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100 bg-light">
+    {% if site_announcement %}
+    <div class="announcement-bar">
+        <div class="container">
+            <div class="announcement-marquee">
+                <span class="announcement-text">
+                    <strong>{{ site_announcement.title }}</strong>
+                    {% if site_announcement.message %} - {{ site_announcement.message }}{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/">
@@ -118,8 +130,8 @@
                     <ul class="footer-links">
                         <li><a href="{% url 'about_us' %}">About</a></li>
                         <li><a href="#">Career</a></li>
-                        <li><a href="#">Our Vision</a></li>
-                        <li><a href="#">Our Mission</a></li>
+                        <li><a href="{% url 'our_vision' %}">Our Vision</a></li>
+                        <li><a href="{% url 'our_mission' %}">Our Mission</a></li>
                         <li><a href="{% url 'gallery' %}">Gallery</a></li>
                     </ul>
                 </div>
@@ -128,8 +140,8 @@
                     <h2 class="footer-title">Support</h2>
                     <ul class="footer-links">
                         <li><a href="#">Contact</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Refund Policy</a></li>
+                        <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
+                        <li><a href="{% url 'refund_policy' %}">Refund Policy</a></li>
                         <li><a href="{% url 'cart' %}">Cart</a></li>
                         <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
                     </ul>

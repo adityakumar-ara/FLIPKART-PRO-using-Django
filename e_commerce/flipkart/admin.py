@@ -40,3 +40,9 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock', 'is_active', 'created_at')
     list_filter = ('category', 'is_active', 'created_at')
     search_fields = ('name', 'category__name')
+
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active', 'start_at', 'end_at', 'created_at')
+    search_fields = ('title', 'message')

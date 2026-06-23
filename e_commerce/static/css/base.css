@@ -147,6 +147,38 @@
     transform: translateY(-2px);
 }
 
+.announcement-bar {
+    background: #f8c145;
+    color: #111;
+    overflow: hidden;
+}
+
+.announcement-marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+.announcement-text {
+    display: inline-block;
+    padding: 0.75rem 0;
+    font-weight: 700;
+    animation: marquee-right-to-left 18s linear infinite;
+}
+
+.announcement-marquee:hover .announcement-text {
+    animation-play-state: paused;
+}
+
+@keyframes marquee-right-to-left {
+    0% {
+        transform: translateX(300%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
 .footer-bottom {
     display: flex;
     align-items: center;
