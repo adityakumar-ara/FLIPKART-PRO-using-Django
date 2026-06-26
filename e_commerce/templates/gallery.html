@@ -1,8 +1,135 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Gallery | Flipkart Pro{% endblock %}
 
 {% block poster_title %}Gallery{% endblock %}
 {% block poster_subtitle %}View product visuals, store highlights, and featured moments.{% endblock %}
 
-{% block content %}{% endblock %}
+{% block extra_css %}
+<style>
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .gallery-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #f8f9fa;
+    }
+
+    .gallery-item:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    .gallery-item-image {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover .gallery-item-image {
+        transform: scale(1.06);
+    }
+
+    .gallery-item-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        padding: 1.5rem 1rem 1rem;
+        color: white;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover .gallery-item-overlay {
+        transform: translateY(0);
+    }
+
+    .gallery-item-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .gallery-item-caption {
+        font-size: 0.85rem;
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .gallery-placeholder {
+        width: 100%;
+        height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        background: #f8f9fa;
+    }
+
+    @media (max-width: 768px) {
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery-item-image {
+            height: 200px;
+        }
+
+        .gallery-placeholder {
+            height: 200px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-5">
+    <p class="lead text-muted text-center">
+        Browse our collection of product images, store moments, and visual highlights that showcase the Flipkart Pro experience.
+    </p>
+</div>
+
+{% if gallery_images %}
+<div class="gallery-grid">
+    {% for image in gallery_images %}
+    <div class="gallery-item">
+        {% if image.image %}
+        <img src="{{ image.image.url }}" alt="{{ image.title }}" class="gallery-item-image">
+        {% else %}
+        <div class="gallery-placeholder">No Image</div>
+        {% endif %}
+        
+        {% if image.title or image.caption %}
+        <div class="gallery-item-overlay">
+            {% if image.title %}
+            <h5 class="gallery-item-title">{{ image.title }}</h5>
+            {% endif %}
+            {% if image.caption %}
+            <p class="gallery-item-caption">{{ image.caption|truncatewords:15 }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info text-center py-5">
+    <h5 class="mb-2">Gallery is Empty</h5>
+    <p class="mb-0">No images uploaded yet. Check back soon for our latest gallery updates!</p>
+</div>
+{% endif %}
+{% endblock %}

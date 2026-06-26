@@ -159,6 +159,11 @@
     position: relative;
 }
 
+.navbar-icon-btn {
+    width: 40px;
+    height: 40px;
+}
+
 .announcement-text {
     display: inline-block;
     padding: 0.75rem 0;

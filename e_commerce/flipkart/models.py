@@ -39,6 +39,35 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def active_products(self):
+        products = []
+        subcategories = getattr(self, 'active_subcategories', None) or self.subcategories.filter(is_active=True)
+        for subcategory in subcategories:
+            products.extend(getattr(subcategory, 'active_products', subcategory.product_set.filter(is_active=True).order_by('-created_at')))
+        return products
+
+
+class SubCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
+    name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='subcategory_images/', blank=True, null=True)
+    needed_for = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Describe who needs or who this subcategory is intended for.'
+    )
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('category', 'name')
+        ordering = ['category__name', 'name']
+
+    def __str__(self):
+        return f"{self.category.name} - {self.name}"
+
 
 class Announcement(models.Model):
     title = models.CharField(max_length=200, blank=True)
@@ -54,7 +83,7 @@ class Announcement(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=150)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
+    category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='product_images/')
     description = models.TextField(blank=True)
@@ -64,3 +93,48 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class TeamMember(models.Model):
+    employee_image = models.ImageField(upload_to='team_images/')
+    employee_name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['employee_name']
+
+    def __str__(self):
+        return f"{self.employee_name} - {self.role}"
+
+
+class Contact(models.Model):
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.subject}"
+
+
+class Gallery(models.Model):
+    image = models.ImageField(upload_to='gallery_images/')
+    title = models.CharField(max_length=200, blank=True)
+    caption = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = 'Gallery'
+
+    def __str__(self):
+        return self.title or f"Gallery Image {self.id}"

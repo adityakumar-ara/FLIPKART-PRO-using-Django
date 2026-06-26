@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | Flipkart Pro{% endblock %}
+
+{% block poster_title %}Checkout{% endblock %}
+{% block poster_subtitle %}Enter your shipping details and confirm your order.{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-4">Shipping & Payment</h2>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary w-100">Place Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 fw-semibold mb-4">Order Summary</h2>
+                <div class="mb-3">
+                    {% for item in cart_items %}
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
+                            <div>
+                                <h3 class="h6 mb-1">{{ item.product.name }}</h3>
+                                <p class="text-muted small mb-0">Qty: {{ item.quantity }}</p>
+                            </div>
+                            <strong>₹{{ item.subtotal }}</strong>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="d-flex align-items-center justify-content-between border-top pt-3">
+                    <span class="fw-semibold">Total</span>
+                    <strong class="fs-5">₹{{ total }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

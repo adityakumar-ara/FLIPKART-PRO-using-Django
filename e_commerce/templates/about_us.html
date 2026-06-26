@@ -1,8 +1,209 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}About Us | Flipkart Pro{% endblock %}
 
 {% block poster_title %}About Us{% endblock %}
 {% block poster_subtitle %}Learn more about Flipkart Pro and the shopping experience we are building.{% endblock %}
 
-{% block content %}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/product_cards.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Mission Section -->
+<section class="py-5 mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h2 class="h3 fw-bold mb-3">Our Mission</h2>
+            <p class="lead text-muted mb-3">
+                At Flipkart Pro, we believe in making quality products accessible to everyone. Our mission is to revolutionize e-commerce by providing seamless shopping experiences, competitive pricing, and exceptional customer service.
+            </p>
+            <p class="text-muted">
+                We are committed to supporting local sellers and artisans, ensuring they have a platform to reach millions of customers while maintaining the highest standards of quality and reliability.
+            </p>
+        </div>
+        <div class="col-lg-6">
+            <div class="bg-light p-5 rounded-3">
+                <h3 class="text-center mb-4">🎯 Mission Statement</h3>
+                <p class="text-center text-muted mb-0">
+                    "To empower people through affordable and convenient shopping, one purchase at a time."
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Vision Section -->
+<section class="py-5 mb-5 bg-light rounded-3">
+    <div class="row align-items-center">
+        <div class="col-lg-6 order-lg-2">
+            <h2 class="h3 fw-bold mb-3">Our Vision</h2>
+            <p class="lead text-muted mb-3">
+                We envision a future where shopping is stress-free, affordable, and enjoyable for millions of customers across the globe.
+            </p>
+            <p class="text-muted">
+                Our vision is to become the most trusted e-commerce platform by leveraging technology, innovation, and customer-centric approaches to deliver unparalleled value in every transaction.
+            </p>
+        </div>
+        <div class="col-lg-6 order-lg-1">
+            <div class="bg-white p-5 rounded-3">
+                <h3 class="text-center mb-4">🚀 Vision Statement</h3>
+                <p class="text-center text-muted mb-0">
+                    "To be the leading global e-commerce platform that revolutionizes how people shop and sell."
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Values Section -->
+<section class="py-5 mb-5">
+    <h2 class="h3 fw-bold mb-4 text-center">Our Core Values</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">✨</div>
+                    <h4 class="card-title">Quality</h4>
+                    <p class="card-text text-muted">
+                        We maintain the highest standards in every product and service we offer.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">💡</div>
+                    <h4 class="card-title">Innovation</h4>
+                    <p class="card-text text-muted">
+                        We constantly innovate to improve the shopping experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">🤝</div>
+                    <h4 class="card-title">Trust</h4>
+                    <p class="card-text text-muted">
+                        We build lasting relationships based on honesty and transparency.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="py-5 mb-5 bg-light rounded-3">
+    <h2 class="h3 fw-bold mb-4 text-center">Why Choose Flipkart Pro?</h2>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="d-flex gap-3 mb-4">
+                <div style="flex-shrink: 0;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">✓</div>
+                </div>
+                <div>
+                    <h5>Wide Product Range</h5>
+                    <p class="text-muted mb-0">Millions of products across all categories to meet your every need.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-3 mb-4">
+                <div style="flex-shrink: 0;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">✓</div>
+                </div>
+                <div>
+                    <h5>Competitive Pricing</h5>
+                    <p class="text-muted mb-0">Best prices with regular deals and discounts for smart shoppers.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-3 mb-4">
+                <div style="flex-shrink: 0;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">✓</div>
+                </div>
+                <div>
+                    <h5>Fast Delivery</h5>
+                    <p class="text-muted mb-0">Quick and reliable shipping to your doorstep across the country.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-3 mb-4">
+                <div style="flex-shrink: 0;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">✓</div>
+                </div>
+                <div>
+                    <h5>Secure Shopping</h5>
+                    <p class="text-muted mb-0">Your data and transactions are protected with advanced security measures.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-3 mb-4">
+                <div style="flex-shrink: 0;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">✓</div>
+                </div>
+                <div>
+                    <h5>24/7 Support</h5>
+                    <p class="text-muted mb-0">Our dedicated customer service team is always ready to help.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex gap-3 mb-4">
+                <div style="flex-shrink: 0;">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">✓</div>
+                </div>
+                <div>
+                    <h5>Easy Returns</h5>
+                    <p class="text-muted mb-0">Hassle-free returns and refunds within 30 days of purchase.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="py-5">
+    <h2 class="h3 fw-bold mb-4 text-center">Meet Our Team</h2>
+    <p class="text-center text-muted mb-5">
+        Talented professionals dedicated to delivering excellence every day.
+    </p>
+
+    {% if team_members %}
+    <div class="row g-4">
+        {% for member in team_members %}
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card product-card h-100 border-0 shadow-sm">
+                <div class="product-image-wrap">
+                    {% if member.employee_image %}
+                    <img src="{{ member.employee_image.url }}" class="card-img-top" alt="{{ member.employee_name }}">
+                    {% else %}
+                    <div class="product-image-placeholder">No Image</div>
+                    {% endif %}
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-semibold">{{ member.employee_name }}</h5>
+                    <p class="card-text small text-primary fw-bold">{{ member.role }}</p>
+                    {% if member.description %}
+                    <p class="card-text small text-muted">{{ member.description|truncatewords:15 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        Our team is being built. Check back soon!
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

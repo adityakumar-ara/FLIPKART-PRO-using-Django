@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us | Flipkart Pro{% endblock %}
+
+{% block poster_badge %}Need Help?{% endblock %}
+{% block poster_title %}Get in Touch with Flipkart Pro{% endblock %}
+{% block poster_subtitle %}We are here for questions, feedback, and support. Reach out anytime.{% endblock %}
+
+{% block content %}
+<div class="row gy-4">
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h2 class="card-title mb-3">Contact Us</h2>
+                <p class="text-muted">Fill in your details and we will respond as soon as possible.</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Name</label>
+                        <input type="text" name="name" id="id_name" class="form-control" value="{{ form_data.name|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email</label>
+                        <input type="email" name="email" id="id_email" class="form-control" value="{{ form_data.email|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_phone" class="form-label">Phone</label>
+                        <input type="tel" name="phone" id="id_phone" class="form-control" value="{{ form_data.phone|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_subject" class="form-label">Subject</label>
+                        <input type="text" name="subject" id="id_subject" class="form-control" value="{{ form_data.subject|default:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_message" class="form-label">Message</label>
+                        <textarea name="message" id="id_message" class="form-control" rows="6" required>{{ form_data.message|default:'' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">Contact Details</h3>
+                        <p class="text-muted">Call, email, or visit our headquarters for support and business inquiries.</p>
+                        <ul class="list-unstyled contact-info">
+                            <li class="mb-3">
+                                <strong>Office Address</strong>
+                                <p class="mb-0">Flipkart Pro Tower, MG Road, Bengaluru, Karnataka 560001, India</p>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Email</strong>
+                                <p class="mb-0"><a href="mailto:support@flipkartpro.com">support@flipkartpro.com</a></p>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Phone</strong>
+                                <p class="mb-0"><a href="tel:+919876543210">+91 98765 43210</a></p>
+                            </li>
+                            <li>
+                                <strong>Support Hours</strong>
+                                <p class="mb-0">Mon - Sat: 9:00 AM to 7:00 PM</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-0">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31180.212463680256!2d77.58032147333187!3d12.971598618841965!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670cd61dbbb%3A0x7ac73e2cf61d8d50!2sMG%20Road%2C%20Bengaluru%2C%20Karnataka%20560001!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                            width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

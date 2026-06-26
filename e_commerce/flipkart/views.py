@@ -8,19 +8,32 @@ from django.core.mail import send_mail
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Category, CustomUser, Product, sliderImage
+from .models import Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact
+from .forms import CheckoutForm
 from django.forms import modelform_factory
 from django.contrib.auth.decorators import login_required
 
 
 def get_categories_with_products():
-    return Category.objects.filter(is_active=True).prefetch_related(
+    subcategories_qs = SubCategory.objects.filter(is_active=True).prefetch_related(
         Prefetch(
             'product_set',
             queryset=Product.objects.filter(is_active=True).order_by('-created_at'),
             to_attr='active_products',
         )
     ).order_by('name')
+
+    return Category.objects.filter(is_active=True).prefetch_related(
+        Prefetch(
+            'subcategories',
+            queryset=subcategories_qs,
+            to_attr='active_subcategories',
+        )
+    ).order_by('name')
+
+
+def get_subcategory_products(subcategory):
+    return Product.objects.filter(category=subcategory, is_active=True).order_by('-created_at')
 
 
 def home(request):
@@ -49,12 +62,50 @@ def category(request):
     return render(request, 'category.html', {'categories': categories})
 
 
+def subcategory_products(request, subcategory_id):
+    subcategory = get_object_or_404(SubCategory, id=subcategory_id, is_active=True)
+    products = get_subcategory_products(subcategory)
+    return render(request, 'subcategory_products.html', {
+        'subcategory': subcategory,
+        'products': products,
+    })
+
+
 def gallery(request):
-    return render(request, 'gallery.html')
+    gallery_images = Gallery.objects.filter(is_active=True).order_by('-created_at')
+    return render(request, 'gallery.html', {'gallery_images': gallery_images})
 
 
 def about_us(request):
-    return render(request, 'about_us.html')
+    team_members = TeamMember.objects.filter(is_active=True).order_by('employee_name')
+    return render(request, 'about_us.html', {'team_members': team_members})
+
+
+def contact_us(request):
+    form_data = {
+        'name': request.POST.get('name', '').strip(),
+        'email': request.POST.get('email', '').strip(),
+        'phone': request.POST.get('phone', '').strip(),
+        'subject': request.POST.get('subject', '').strip(),
+        'message': request.POST.get('message', '').strip(),
+    }
+
+    if request.method == 'POST':
+        if not all(form_data.values()):
+            messages.error(request, 'Please fill in all contact fields.')
+            return render(request, 'contact_us.html', {'form_data': form_data})
+
+        Contact.objects.create(
+            name=form_data['name'],
+            email=form_data['email'],
+            phone=form_data['phone'],
+            subject=form_data['subject'],
+            message=form_data['message'],
+        )
+        messages.success(request, 'Thank you for contacting us. We have received your message and will reply soon.')
+        return redirect('contact_us')
+
+    return render(request, 'contact_us.html', {'form_data': form_data})
 
 
 def wishlist(request):
@@ -78,6 +129,48 @@ def cart(request):
         })
 
     return render(request, 'cart.html', {
+        'cart_items': cart_items,
+        'total': total,
+    })
+
+
+def checkout(request):
+    cart_data = request.session.get('cart', {})
+    products = Product.objects.filter(id__in=cart_data.keys(), is_active=True)
+    if not products:
+        messages.info(request, 'Your cart is empty. Add products before checking out.')
+        return redirect('cart')
+
+    cart_items = []
+    total = 0
+    for product_item in products:
+        quantity = cart_data.get(str(product_item.id), 0)
+        subtotal = product_item.price * quantity
+        total += subtotal
+        cart_items.append({
+            'product': product_item,
+            'quantity': quantity,
+            'subtotal': subtotal,
+        })
+
+    if request.method == 'POST':
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            request.session['cart'] = {}
+            request.session.modified = True
+            messages.success(request, 'Your order has been placed successfully. We will contact you soon.')
+            return redirect('home')
+    else:
+        initial_data = {
+            'full_name': request.user.get_full_name() if request.user.is_authenticated else '',
+            'email': request.user.email if request.user.is_authenticated else '',
+            'phone': request.user.mobile_no if request.user.is_authenticated else '',
+            'address': request.user.address if request.user.is_authenticated else '',
+        }
+        form = CheckoutForm(initial=initial_data)
+
+    return render(request, 'checkout.html', {
+        'form': form,
         'cart_items': cart_items,
         'total': total,
     })
