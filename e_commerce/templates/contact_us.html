@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Contact Us | Flipkart Pro{% endblock %}
 
@@ -6,79 +7,110 @@
 {% block poster_title %}Get in Touch with Flipkart Pro{% endblock %}
 {% block poster_subtitle %}We are here for questions, feedback, and support. Reach out anytime.{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="row gy-4">
-    <div class="col-12 col-lg-6">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h2 class="card-title mb-3">Contact Us</h2>
-                <p class="text-muted">Fill in your details and we will respond as soon as possible.</p>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="id_name" class="form-label">Name</label>
-                        <input type="text" name="name" id="id_name" class="form-control" value="{{ form_data.name|default:'' }}" required>
+<div class="contact-shell">
+    <div class="row gy-4">
+        <div class="col-12 col-lg-7">
+            <div class="card contact-card contact-form-card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="contact-heading mb-4">
+                        <span class="contact-pill">Quick Support</span>
+                        <h2 class="card-title mb-2">Contact Us</h2>
+                        <p class="text-muted mb-0">Share your query and our support team will get back to you shortly.</p>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_email" class="form-label">Email</label>
-                        <input type="email" name="email" id="id_email" class="form-control" value="{{ form_data.email|default:'' }}" required>
+                    <form method="post" novalidate class="contact-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">Name</label>
+                            <input type="text" name="name" id="id_name" class="form-control" value="{{ form_data.name|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_email" class="form-label">Email</label>
+                            <input type="email" name="email" id="id_email" class="form-control" value="{{ form_data.email|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_phone" class="form-label">Phone</label>
+                            <input type="tel" name="phone" id="id_phone" class="form-control" value="{{ form_data.phone|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_subject" class="form-label">Subject</label>
+                            <input type="text" name="subject" id="id_subject" class="form-control" value="{{ form_data.subject|default:'' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_message" class="form-label">Message</label>
+                            <textarea name="message" id="id_message" class="form-control" rows="6" required>{{ form_data.message|default:'' }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary contact-submit">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="card contact-card contact-details-card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="contact-heading mb-4">
+                        <span class="contact-pill contact-pill-alt">Reach Us</span>
+                        <h3 class="card-title mb-2">Let’s talk</h3>
+                        <p class="text-muted mb-0">Choose the easiest way to reach our team for help, feedback, or partnership.</p>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_phone" class="form-label">Phone</label>
-                        <input type="tel" name="phone" id="id_phone" class="form-control" value="{{ form_data.phone|default:'' }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_subject" class="form-label">Subject</label>
-                        <input type="text" name="subject" id="id_subject" class="form-control" value="{{ form_data.subject|default:'' }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_message" class="form-label">Message</label>
-                        <textarea name="message" id="id_message" class="form-control" rows="6" required>{{ form_data.message|default:'' }}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Send Message</button>
-                </form>
+                    <ul class="contact-info-list">
+                        <li class="contact-info-item">
+                            <span class="contact-info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+                            </span>
+                            <div>
+                                <strong>Office Address</strong>
+                                <p class="mb-0">Flipkart Pro Tower, MG Road, Bengaluru, Karnataka 560001, India</p>
+                            </div>
+                        </li>
+                        <li class="contact-info-item">
+                            <span class="contact-info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555z"/><path d="M0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144L9.238 8.83 8 9.586 6.761 8.83zM10.197 8.243 16 11.801V4.697l-5.803 3.546z"/></svg>
+                            </span>
+                            <div>
+                                <strong>Email</strong>
+                                <p class="mb-0"><a href="mailto:support@flipkartpro.com">support@flipkartpro.com</a></p>
+                            </div>
+                        </li>
+                        <li class="contact-info-item">
+                            <span class="contact-info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.654 1.328a.678.678 0 0 1 .736-.052l2.522 1.44c.329.188.445.59.269.927L6.18 5.54a.678.678 0 0 1-.588.362c-.26.006-.514.017-.76.038a11.6 11.6 0 0 0 5.228 5.228c.021-.246.032-.5.038-.76a.678.678 0 0 1 .362-.588l1.897-1.001a.678.678 0 0 1 .927.269l1.44 2.522a.678.678 0 0 1-.052.736c-.68.825-1.721 1.232-2.764.957C6.75 12.012 2.988 8.25 1.697 4.092c-.275-1.043.132-2.084.957-2.764z"/></svg>
+                            </span>
+                            <div>
+                                <strong>Phone</strong>
+                                <p class="mb-0"><a href="tel:+919876543210">+91 98765 43210</a></p>
+                            </div>
+                        </li>
+                        <li class="contact-info-item">
+                            <span class="contact-info-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.5a.5.5 0 0 1 .5.5v3.793l2.146 2.147a.5.5 0 0 1-.708.708l-2.5-2.5A.5.5 0 0 1 7.5 7.5V4a.5.5 0 0 1 .5-.5z"/><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/></svg>
+                            </span>
+                            <div>
+                                <strong>Support Hours</strong>
+                                <p class="mb-0">Mon - Sat: 9:00 AM to 7:00 PM</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="contact-quick-note">Need faster answers? Call us between 9:00 AM and 7:00 PM.</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-12 col-lg-6">
-        <div class="row g-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body">
-                        <h3 class="card-title">Contact Details</h3>
-                        <p class="text-muted">Call, email, or visit our headquarters for support and business inquiries.</p>
-                        <ul class="list-unstyled contact-info">
-                            <li class="mb-3">
-                                <strong>Office Address</strong>
-                                <p class="mb-0">Flipkart Pro Tower, MG Road, Bengaluru, Karnataka 560001, India</p>
-                            </li>
-                            <li class="mb-3">
-                                <strong>Email</strong>
-                                <p class="mb-0"><a href="mailto:support@flipkartpro.com">support@flipkartpro.com</a></p>
-                            </li>
-                            <li class="mb-3">
-                                <strong>Phone</strong>
-                                <p class="mb-0"><a href="tel:+919876543210">+91 98765 43210</a></p>
-                            </li>
-                            <li>
-                                <strong>Support Hours</strong>
-                                <p class="mb-0">Mon - Sat: 9:00 AM to 7:00 PM</p>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body p-0">
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31180.212463680256!2d77.58032147333187!3d12.971598618841965!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670cd61dbbb%3A0x7ac73e2cf61d8d50!2sMG%20Road%2C%20Bengaluru%2C%20Karnataka%20560001!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-                            width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    </div>
-                </div>
-            </div>
+    <div class="card contact-card contact-map-card shadow-sm border-0 mt-4">
+        <div class="card-body p-0">
+            <iframe
+                class="contact-map-frame"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31180.212463680256!2d77.58032147333187!3d12.971598618841965!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae1670cd61dbbb%3A0x7ac73e2cf61d8d50!2sMG%20Road%2C%20Bengaluru%2C%20Karnataka%20560001!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
         </div>
     </div>
 </div>

@@ -39,9 +39,11 @@ def get_subcategory_products(subcategory):
 def home(request):
     slider_images = sliderImage.objects.all().order_by('id')
     categories = get_categories_with_products()
+    top_products = Product.objects.filter(is_active=True, is_show_top_poduct=True).order_by('-created_at')[:8]
     return render(request, 'home.html', {
         'slider_images': slider_images,
         'categories': categories,
+        'top_products': top_products,
     })
 
 
@@ -59,6 +61,10 @@ def product(request):
 
 def category(request):
     categories = get_categories_with_products()
+    # For each category, limit the number of subcategories to 14
+    for cat in categories:
+        if hasattr(cat, 'active_subcategories'):
+            cat.active_subcategories = cat.active_subcategories[:14]
     return render(request, 'category.html', {'categories': categories})
 
 

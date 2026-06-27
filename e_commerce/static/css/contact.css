@@ -1,0 +1,131 @@
+:root {
+    --contact-accent: #2563eb;
+    --contact-accent-soft: #e8f1ff;
+    --contact-border: #e5e7eb;
+    --contact-text: #334155;
+}
+
+.contact-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.contact-card {
+    border-radius: 1.25rem;
+    overflow: hidden;
+}
+
+.contact-form-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.contact-details-card {
+    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+    color: #f8fafc;
+}
+
+.contact-details-card .text-muted,
+.contact-details-card .contact-quick-note,
+.contact-details-card .contact-info-item p,
+.contact-details-card .contact-info-item a {
+    color: rgba(248, 250, 252, 0.86) !important;
+}
+
+.contact-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.contact-pill {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    background: var(--contact-accent-soft);
+    color: var(--contact-accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.contact-pill-alt {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.contact-form .form-control {
+    border-radius: 0.8rem;
+    border: 1px solid var(--contact-border);
+    padding: 0.8rem 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-form .form-control:focus {
+    border-color: var(--contact-accent);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.15);
+}
+
+.contact-submit {
+    border-radius: 999px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+}
+
+.contact-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+}
+
+.contact-info-item {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+}
+
+.contact-info-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.contact-quick-note {
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.95rem;
+}
+
+.contact-map-card {
+    border-radius: 1.2rem;
+}
+
+.contact-map-frame {
+    width: 100%;
+    min-height: 320px;
+    border: 0;
+}
+
+@media (max-width: 767px) {
+    .contact-info-item {
+        padding: 0.85rem;
+    }
+
+    .contact-map-frame {
+        min-height: 260px;
+    }
+}

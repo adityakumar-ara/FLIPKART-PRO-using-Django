@@ -44,8 +44,8 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock', 'is_active', 'created_at')
-    list_filter = ('category', 'is_active', 'created_at')
+    list_display = ('name', 'category', 'price', 'stock', 'is_active', 'is_show_top_poduct', 'created_at')
+    list_filter = ('category', 'is_active', 'is_show_top_poduct', 'created_at')
     search_fields = ('name', 'category__name')
 
 

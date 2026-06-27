@@ -32,6 +32,9 @@
             </div>
 
             <div class="card-body d-flex flex-column">
+                {% if product.is_owner_selected %}
+                <span class="badge text-bg-warning align-self-start mb-2">Owner's Pick</span>
+                {% endif %}
                 <h3 class="h6 card-title fw-semibold">{{ product.name }}</h3>
                 {% if product.description %}
                 <p class="card-text small text-muted">{{ product.description|truncatewords:12 }}</p>
