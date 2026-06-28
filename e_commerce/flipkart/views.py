@@ -14,16 +14,40 @@ from django.forms import modelform_factory
 from django.contrib.auth.decorators import login_required
 
 
-def get_categories_with_products():
-    subcategories_qs = SubCategory.objects.filter(is_active=True).prefetch_related(
+def get_categories_with_products(subcategory_name_filter=None, product_name_filter=None, product_price_filter=None, category_id_filter=None):
+    subcategories_qs = SubCategory.objects.filter(is_active=True)
+
+    if subcategory_name_filter:
+        subcategories_qs = subcategories_qs.filter(name__icontains=subcategory_name_filter)
+
+    product_qs = Product.objects.filter(is_active=True)
+
+    if product_name_filter:
+        product_qs = product_qs.filter(name__icontains=product_name_filter)
+
+    if product_price_filter:
+        if product_price_filter == "0-500":
+            product_qs = product_qs.filter(price__gte=0, price__lte=500)
+        elif product_price_filter == "500-1000":
+            product_qs = product_qs.filter(price__gte=500, price__lte=1000)
+        elif product_price_filter == "1000-5000":
+            product_qs = product_qs.filter(price__gte=1000, price__lte=5000)
+        elif product_price_filter == "5000+":
+            product_qs = product_qs.filter(price__gte=5000)
+
+    subcategories_qs = subcategories_qs.prefetch_related(
         Prefetch(
             'product_set',
-            queryset=Product.objects.filter(is_active=True).order_by('-created_at'),
+            queryset=product_qs.order_by('-created_at'),
             to_attr='active_products',
         )
     ).order_by('name')
 
-    return Category.objects.filter(is_active=True).prefetch_related(
+    category_qs = Category.objects.filter(is_active=True)
+    if category_id_filter:
+        category_qs = category_qs.filter(id=category_id_filter)
+
+    return category_qs.prefetch_related(
         Prefetch(
             'subcategories',
             queryset=subcategories_qs,
@@ -48,24 +72,78 @@ def home(request):
 
 
 def product(request):
-    categories = get_categories_with_products()
-    uncategorized_products = Product.objects.filter(
-        category__isnull=True,
-        is_active=True,
-    ).order_by('-created_at')
+    all_categories = Category.objects.filter(is_active=True).order_by('name')
+
+    search_query = request.GET.get("search", "").strip()
+    price_filter = request.GET.get("price", "").strip()
+    category_filter_id = request.GET.get("category", "").strip()
+
+    product_name_filter = None
+    product_price_filter = None
+
+    if search_query:
+        product_name_filter = search_query
+    if price_filter:
+        product_price_filter = price_filter
+
+    categories = get_categories_with_products(
+        category_id_filter=category_filter_id,
+        product_name_filter=product_name_filter,
+        product_price_filter=product_price_filter
+    )
+
+    uncategorized_products = None
+    if not category_filter_id:
+        uncategorized_products_qs = Product.objects.filter(
+            category__isnull=True,
+            is_active=True,
+        )
+
+        if product_name_filter:
+            uncategorized_products_qs = uncategorized_products_qs.filter(name__icontains=product_name_filter)
+        if product_price_filter:
+            if price_filter == "0-500":
+                uncategorized_products_qs = uncategorized_products_qs.filter(price__gte=0, price__lte=500)
+            elif price_filter == "500-1000":
+                uncategorized_products_qs = uncategorized_products_qs.filter(price__gte=500, price__lte=1000)
+            elif price_filter == "1000-5000":
+                uncategorized_products_qs = uncategorized_products_qs.filter(price__gte=1000, price__lte=5000)
+            elif price_filter == "5000+":
+                uncategorized_products_qs = uncategorized_products_qs.filter(price__gte=5000)
+
+        uncategorized_products = uncategorized_products_qs.order_by('-created_at')
+
     return render(request, 'product.html', {
+        'all_categories': all_categories,
         'categories': categories,
         'uncategorized_products': uncategorized_products,
+        'search_query': search_query,
+        'price_filter': price_filter,
+        'category_filter_id': category_filter_id,
     })
 
 
 def category(request):
-    categories = get_categories_with_products()
-    # For each category, limit the number of subcategories to 14
-    for cat in categories:
-        if hasattr(cat, 'active_subcategories'):
-            cat.active_subcategories = cat.active_subcategories[:14]
-    return render(request, 'category.html', {'categories': categories})
+    query = request.GET.get('q', '').strip()
+    category_filter_id = request.GET.get('category', '').strip()
+
+    categories = get_categories_with_products(
+        subcategory_name_filter=query,
+        category_id_filter=category_filter_id
+    )
+
+    # If there is no search query and no category filter, limit the number of subcategories to 14
+    if not query and not category_filter_id:
+        for cat in categories:
+            if hasattr(cat, 'active_subcategories'):
+                cat.active_subcategories = cat.active_subcategories[:14]
+
+    all_categories = Category.objects.filter(is_active=True).order_by('name')
+    context = {
+        'categories': categories, 'query': query, 'all_categories': all_categories,
+        'category_filter_id': category_filter_id,
+    }
+    return render(request, 'category.html', context)
 
 
 def subcategory_products(request, subcategory_id):
