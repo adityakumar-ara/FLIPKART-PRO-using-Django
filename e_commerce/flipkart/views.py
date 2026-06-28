@@ -172,7 +172,7 @@ def subcategory_products(request, subcategory_id):
             products_list = products_list.filter(price__gte=5000)
 
     # Pagination
-    paginator = Paginator(products_list, 10)  # Show 10 products per page
+    paginator = Paginator(products_list, 16)  # Show 16 products per page
     page_number = request.GET.get('page')
     try:
         products = paginator.page(page_number)

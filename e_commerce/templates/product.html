@@ -51,9 +51,11 @@
             {% if category.active_products %}
             <section class="product-section mb-5">
                 <h2 class="h4 fw-semibold mb-3">{{ category.name }}</h2>
-                <div class="product-grid">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                     {% for product in category.active_products %}
-                        {% include 'includes/product_card.html' with product=product %}
+                        <div class="col">
+                            {% include 'includes/product_card.html' with product=product %}
+                        </div>
                     {% endfor %}
                 </div>
             </section>
@@ -63,9 +65,11 @@
         {% if uncategorized_products %}
         <section class="product-section mb-5">
             <h2 class="h4 fw-semibold mb-3">More Products</h2>
-            <div class="product-grid">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                 {% for product in uncategorized_products %}
-                    {% include 'includes/product_card.html' with product=product %}
+                    <div class="col">
+                        {% include 'includes/product_card.html' with product=product %}
+                    </div>
                 {% endfor %}
             </div>
         </section>
