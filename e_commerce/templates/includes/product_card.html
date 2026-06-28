@@ -1,0 +1,32 @@
+{% comment %}
+Expects a `product` object in the context.
+{% endcomment %}
+<div class="card product-card h-100 border-0 shadow-sm">
+    <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-body">
+        <div class="product-image-wrap">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% else %}
+            <div class="product-image-placeholder">No Image</div>
+            {% endif %}
+        </div>
+        <div class="card-body pb-0">
+            <h3 class="h6 card-title fw-semibold text-truncate" title="{{ product.name }}">{{ product.name }}</h3>
+            <p class="card-text small text-muted">
+                {% if product.category %}{{ product.category.name }}{% else %}Uncategorized{% endif %}
+            </p>
+            <p class="h5 fw-bold mb-2">₹{{ product.price }}</p>
+        </div>
+    </a>
+    <div class="card-footer bg-white border-0 pt-0">
+        {% if product.stock > 0 %}
+        <form action="{% url 'add_to_cart' product.id %}" method="post" class="d-grid">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-shopping-cart me-1"></i> Add to Cart</button>
+        </form>
+        {% else %}
+        <button type="button" class="btn btn-sm btn-outline-danger w-100" disabled>Out of Stock</button>
+        {% endif %}
+    </div>
+</div>

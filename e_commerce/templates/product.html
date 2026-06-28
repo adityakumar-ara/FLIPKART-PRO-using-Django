@@ -1,71 +1,81 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Product | Flipkart Pro{% endblock %}
+{% block title %}Products | Flipkart Pro{% endblock %}
 
 {% block poster_title %}All Products{% endblock %}
-{% block poster_subtitle %}Browse premium picks arranged category wise for quick shopping.{% endblock %}
+{% block poster_subtitle %}Find everything you need from our extensive collection.{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/product_cards.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h1 class="h3 fw-bold mb-1">All Products</h1>
-        <p class="text-muted mb-0">Browse all products category wise.</p>
+<div class="row">
+    <div class="col-lg-3">
+        <div class="p-4 border rounded bg-light mb-4">
+            <h4 class="fw-semibold mb-3">Filters</h4>
+            <form method="get" action="{% url 'product' %}">
+                <div class="mb-3">
+                    <label for="search" class="form-label">Product Name</label>
+                    <input type="text" name="search" id="search" class="form-control" placeholder="e.g., 'laptop'" value="{{ search_query|default_if_none:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select id="category" name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for cat in all_categories %}
+                            <option value="{{ cat.id }}" {% if category_filter_id == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Price Range</label>
+                    <select id="price" name="price" class="form-select">
+                        <option value="">All Prices</option>
+                        <option value="0-500" {% if price_filter == '0-500' %}selected{% endif %}>₹0 - ₹500</option>
+                        <option value="500-1000" {% if price_filter == '500-1000' %}selected{% endif %}>₹500 - ₹1000</option>
+                        <option value="1000-5000" {% if price_filter == '1000-5000' %}selected{% endif %}>₹1000 - ₹5000</option>
+                        <option value="5000+" {% if price_filter == '5000+' %}selected{% endif %}>₹5000+</option>
+                    </select>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="submit">Apply Filters</button>
+                    <a href="{% url 'product' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-9">
+        {% for category in categories %}
+            {% if category.active_products %}
+            <section class="product-section mb-5">
+                <h2 class="h4 fw-semibold mb-3">{{ category.name }}</h2>
+                <div class="product-grid">
+                    {% for product in category.active_products %}
+                        {% include 'includes/product_card.html' with product=product %}
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        {% endfor %}
+
+        {% if uncategorized_products %}
+        <section class="product-section mb-5">
+            <h2 class="h4 fw-semibold mb-3">More Products</h2>
+            <div class="product-grid">
+                {% for product in uncategorized_products %}
+                    {% include 'includes/product_card.html' with product=product %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if not categories and not uncategorized_products %}
+            <div class="alert alert-info">
+                No products found matching your search criteria.
+            </div>
+        {% endif %}
     </div>
 </div>
-
-<form method="get" action="{% url 'product' %}" class="mb-4 p-4 border rounded bg-light">
-    <div class="row g-3">
-        <div class="col-md-4">
-            <label for="category" class="form-label fw-semibold">Category</label>
-            <select id="category" name="category" class="form-select">
-                <option value="">All Categories</option>
-                {% for cat in all_categories %}
-                    <option value="{{ cat.id }}" {% if category_filter_id == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label for="search" class="form-label fw-semibold">Product Name</label>
-            <input type="text" name="search" id="search" class="form-control" placeholder="Search by name..." value="{{ search_query|default:'' }}">
-        </div>
-        <div class="col-md-4">
-            <label for="price" class="form-label fw-semibold">Price Range</label>
-            <select name="price" id="price" class="form-select">
-                <option value="">Any Price</option>
-                <option value="0-500" {% if price_filter == '0-500' %}selected{% endif %}>₹0 - ₹500</option>
-                <option value="500-1000" {% if price_filter == '500-1000' %}selected{% endif %}>₹500 - ₹1000</option>
-                <option value="1000-5000" {% if price_filter == '1000-5000' %}selected{% endif %}>₹1000 - ₹5000</option>
-                <option value="5000+" {% if price_filter == '5000+' %}selected{% endif %}>₹5000+</option>
-            </select>
-        </div>
-    </div>
-    <div class="row mt-3">
-        <div class="col-12 d-flex justify-content-end gap-2">
-            <button class="btn btn-primary" type="submit">Apply Filters</button>
-            {% if category_filter_id or search_query or price_filter %}
-                <a href="{% url 'product' %}" class="btn btn-outline-secondary">Clear Filters</a>
-            {% endif %}
-        </div>
-    </div>
-</form>
-
-{% include 'includes/product_sections.html' %}
-
-{% if uncategorized_products %}
-<section class="product-section mb-5">
-    <div class="d-flex align-items-center gap-3 mb-3">
-        <div>
-            <h2 class="h4 fw-semibold mb-0">Other Products</h2>
-            <p class="text-muted mb-0">Products that do not have a category selected.</p>
-        </div>
-    </div>
-
-    {% include 'includes/product_grid.html' with products=uncategorized_products %}
-</section>
-{% endif %}
 {% endblock %}

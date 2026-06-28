@@ -6,11 +6,12 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Prefetch
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact
 from .forms import CheckoutForm
-from django.forms import modelform_factory
+from django.forms import modelform_factory, TextInput, EmailInput, DateInput, Textarea, Select
 from django.contrib.auth.decorators import login_required
 
 
@@ -63,7 +64,7 @@ def get_subcategory_products(subcategory):
 def home(request):
     slider_images = sliderImage.objects.all().order_by('id')
     categories = get_categories_with_products()
-    top_products = Product.objects.filter(is_active=True, is_show_top_poduct=True).order_by('-created_at')[:8]
+    top_products = Product.objects.filter(is_active=True, is_owner_selected=True).order_by('-created_at')[:8]
     return render(request, 'home.html', {
         'slider_images': slider_images,
         'categories': categories,
@@ -148,11 +149,58 @@ def category(request):
 
 def subcategory_products(request, subcategory_id):
     subcategory = get_object_or_404(SubCategory, id=subcategory_id, is_active=True)
-    products = get_subcategory_products(subcategory)
-    return render(request, 'subcategory_products.html', {
+
+    # Get filter parameters from request
+    search_query = request.GET.get("search", "").strip()
+    price_filter = request.GET.get("price", "").strip()
+
+    # Initial queryset
+    products_list = get_subcategory_products(subcategory)
+
+    # Apply filters
+    if search_query:
+        products_list = products_list.filter(name__icontains=search_query)
+
+    if price_filter:
+        if price_filter == "0-500":
+            products_list = products_list.filter(price__gte=0, price__lte=500)
+        elif price_filter == "500-1000":
+            products_list = products_list.filter(price__gte=500, price__lte=1000)
+        elif price_filter == "1000-5000":
+            products_list = products_list.filter(price__gte=1000, price__lte=5000)
+        elif price_filter == "5000+":
+            products_list = products_list.filter(price__gte=5000)
+
+    # Pagination
+    paginator = Paginator(products_list, 10)  # Show 10 products per page
+    page_number = request.GET.get('page')
+    try:
+        products = paginator.page(page_number)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+
+    # Get other subcategories for sidebar
+    other_subcategories = SubCategory.objects.filter(
+        category=subcategory.category,
+        is_active=True
+    ).exclude(id=subcategory.id).order_by('name')
+
+    context = {
         'subcategory': subcategory,
         'products': products,
-    })
+        'other_subcategories': other_subcategories,
+        'search_query': search_query,
+        'price_filter': price_filter,
+    }
+    return render(request, 'subcategory_products.html', context)
+
+
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    # You could also fetch related or similar products here to display on the page
+    return render(request, 'product_detail.html', {'product': product})
 
 
 def gallery(request):
@@ -470,6 +518,16 @@ def edit_profile(request):
             'username', 'full_name', 'email', 'mobile_no', 'dob', 'address',
             'alternate_mobile_no', 'profile_image', 'gender',
         ],
+        widgets={
+            'full_name': TextInput(attrs={'class': 'form-control'}),
+            'username': TextInput(attrs={'class': 'form-control'}),
+            'email': EmailInput(attrs={'class': 'form-control'}),
+            'mobile_no': TextInput(attrs={'class': 'form-control'}),
+            'alternate_mobile_no': TextInput(attrs={'class': 'form-control', 'placeholder': 'Optional'}),
+            'dob': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'address': Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'gender': Select(attrs={'class': 'form-select'}),
+        }
     )
     if request.method == 'POST':
         form = form_class(request.POST, request.FILES, instance=user)
@@ -477,6 +535,7 @@ def edit_profile(request):
             form.save()
             messages.success(request, 'Profile updated successfully.')
             return redirect('my_profile')
+        # If form is not valid, it will be re-rendered with errors below
     else:
         form = form_class(instance=user)
     return render(request, 'edit_profile.html', {'form': form})

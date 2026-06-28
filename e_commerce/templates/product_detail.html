@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} | Flipkart Pro{% endblock %}
+
+{% block poster_title %}{{ product.name }}{% endblock %}
+{% if product.category %}
+    {% block poster_subtitle %}
+        Part of the <a href="{% url 'subcategory_products' product.category.id %}" class="text-white">{{ product.category.name }}</a> collection.
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row g-5">
+        <div class="col-md-5">
+            <div class="border rounded-3 p-3 bg-white shadow-sm">
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            </div>
+        </div>
+        <div class="col-md-7">
+            <h1 class="fw-bold display-5">{{ product.name }}</h1>
+            
+            <p class="h3 fw-semibold my-3">₹{{ product.price }}</p>
+            
+            <div class="lead mb-4">
+                {{ product.description|linebreaks }}
+            </div>
+
+            {% if product.stock > 0 %}
+                <p class="text-success fw-semibold"><i class="fas fa-check-circle me-2"></i>In Stock ({{ product.stock }} available)</p>
+            {% else %}
+                <p class="text-danger fw-semibold"><i class="fas fa-times-circle me-2"></i>Out of Stock</p>
+            {% endif %}
+
+            <div class="d-flex gap-2 mt-4">
+                {% if product.stock > 0 %}
+                <form action="{% url 'add_to_cart' product.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" class="btn btn-primary btn-lg px-4"><i class="fas fa-shopping-cart me-2"></i> Add to Cart</button>
+                </form>
+                <a href="{% url 'buy_now' product.id %}" class="btn btn-success btn-lg px-4"><i class="fas fa-bolt me-2"></i> Buy Now</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

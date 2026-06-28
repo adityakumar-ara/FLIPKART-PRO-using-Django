@@ -89,7 +89,7 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
-    is_show_top_poduct = models.BooleanField(default=False, help_text='Show this product in the home page owner-picked section.')
+    is_owner_selected = models.BooleanField(default=False, help_text='Show this product in the home page owner-picked section.')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

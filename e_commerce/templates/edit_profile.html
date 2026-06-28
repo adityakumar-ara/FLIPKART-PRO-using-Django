@@ -1,15 +1,114 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Edit Profile | Flipkart Pro{% endblock %}
 
+{% block poster_title %}Edit Profile{% endblock %}
+{% block poster_subtitle %}Update your personal details and account information.{% endblock %}
+
 {% block content %}
-<div class="py-4">
-    <h3>Edit Profile</h3>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-primary" type="submit">Save</button>
-        <a class="btn btn-secondary" href="{% url 'my_profile' %}">Cancel</a>
-    </form>
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4 p-md-5">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <div class="row g-5">
+                <div class="col-lg-4">
+                    <h4 class="fw-semibold mb-3">Profile Picture</h4>
+                    <div class="text-center">
+                        <img id="imagePreview"
+                             src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}"
+                             alt="Profile Picture"
+                             class="rounded-circle mb-3"
+                             style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #eee;">
+
+                        <label for="{{ form.profile_image.id_for_label }}" class="btn btn-sm btn-secondary">Change Picture</label>
+                        <div class="d-none">
+                            {{ form.profile_image }}
+                        </div>
+                        {% if form.profile_image.errors %}
+                            {% for error in form.profile_image.errors %}
+                                <div class="text-danger small mt-2">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                        <p class="text-muted small mt-2">JPG, PNG, or GIF. Max size of 2MB.</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <h4 class="fw-semibold mb-3">Account Details</h4>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.full_name.id_for_label }}" class="form-label">Full Name</label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}{% for error in form.full_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}{% for error in form.username.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}{% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.mobile_no.id_for_label }}" class="form-label">Mobile Number</label>
+                            {{ form.mobile_no }}
+                            {% if form.mobile_no.errors %}{% for error in form.mobile_no.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.alternate_mobile_no.id_for_label }}" class="form-label">Alternate Mobile</label>
+                            {{ form.alternate_mobile_no }}
+                            {% if form.alternate_mobile_no.errors %}{% for error in form.alternate_mobile_no.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}{% for error in form.gender.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.dob.id_for_label }}" class="form-label">Date of Birth</label>
+                            {{ form.dob }}
+                            {% if form.dob.errors %}{% for error in form.dob.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                            {{ form.address }}
+                            {% if form.address.errors %}{% for error in form.address.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-end gap-2">
+                        <a href="{% url 'my_profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('{{ form.profile_image.id_for_label }}');
+    const imagePreview = document.getElementById('imagePreview');
+
+    if (imageInput && imagePreview) {
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
