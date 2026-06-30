@@ -254,6 +254,13 @@ def cart(request):
         'total': total,
     })
 
+@login_required
+def delete_cart(request, product_id):
+    cart_items = Cart.objects.filter(user=request.user, product_id=product_id)
+    cart_items.delete()
+    return redirect('cart')
+    
+    return render(request, 'cart.html')
 
 @login_required
 def checkout(request):
