@@ -9,7 +9,7 @@ from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Cart, Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact
+from .models import Cart, Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact, Order, OrderItem
 from .forms import CheckoutForm
 from django.forms import modelform_factory, TextInput, EmailInput, DateInput, Textarea, Select
 from django.contrib.auth.decorators import login_required
@@ -274,11 +274,34 @@ def checkout(request):
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            # In a real application, you would create an Order object here.
-            # For now, we'll just clear the cart.
+            order = Order.objects.create(
+                user=request.user,
+                full_name=form.cleaned_data['full_name'],
+                email=form.cleaned_data['email'],
+                phone=form.cleaned_data['phone'],
+                address=form.cleaned_data['address'],
+                city=form.cleaned_data['city'],
+                state=form.cleaned_data['state'],
+                postal_code=form.cleaned_data['postal_code'],
+                country=form.cleaned_data['country'],
+                payment_method=form.cleaned_data['payment_method'],
+                order_notes=form.cleaned_data['order_notes'],
+                total_amount=total,
+            )
+            order_items = [
+                OrderItem(
+                    order=order,
+                    product=item.product,
+                    quantity=item.quantity,
+                    price=item.product.price,
+                    subtotal=item.total_price,
+                )
+                for item in cart_items
+            ]
+            OrderItem.objects.bulk_create(order_items)
             cart_items.delete()
             messages.success(request, 'Your order has been placed successfully. We will contact you soon.')
-            return redirect('home')
+            return redirect('my_orders')
     else:
         initial_data = {
             'full_name': request.user.get_full_name(),
@@ -333,8 +356,10 @@ def my_profile(request):
     return render(request, 'my_profile.html')
 
 
+@login_required
 def my_orders(request):
-    return render(request, 'my_orders.html')
+    orders = Order.objects.filter(user=request.user).prefetch_related('items__product')
+    return render(request, 'my_orders.html', {'orders': orders})
 
 
 def logout_view(request):

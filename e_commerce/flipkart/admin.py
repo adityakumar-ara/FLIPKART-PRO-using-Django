@@ -3,6 +3,13 @@ from django.contrib.auth.admin import UserAdmin
 
 from .models import *
 
+# Register orders and order items if they exist
+try:
+    from .models import Order, OrderItem
+except ImportError:
+    Order = None
+    OrderItem = None
+
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
@@ -74,6 +81,19 @@ class GalleryAdmin(admin.ModelAdmin):
     list_display = ('title', 'is_active', 'created_at')
     list_filter = ('is_active', 'created_at')
     search_fields = ('title', 'caption')
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'full_name', 'total_amount', 'payment_method', 'status', 'created_at')
+    list_filter = ('payment_method', 'status', 'created_at')
+    search_fields = ('user__username', 'full_name', 'email')
+
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ('order', 'product', 'quantity', 'price', 'subtotal')
+    search_fields = ('order__id', 'product__name')
 
 
 @admin.register(Contact)
