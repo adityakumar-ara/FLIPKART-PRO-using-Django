@@ -49,6 +49,13 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'category__name')
 
 
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'quantity', 'not_show', 'created_at', 'updated_at')
+    list_filter = ('not_show', 'created_at', 'updated_at')
+    search_fields = ('user__username', 'product__name')
+
+
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
     list_display = ('title', 'is_active', 'start_at', 'end_at', 'created_at')
