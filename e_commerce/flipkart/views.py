@@ -9,7 +9,7 @@ from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact
+from .models import Cart, Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact
 from .forms import CheckoutForm
 from django.forms import modelform_factory, TextInput, EmailInput, DateInput, Textarea, Select
 from django.contrib.auth.decorators import login_required
@@ -244,21 +244,10 @@ def wishlist(request):
     return render(request, 'wishlist.html')
 
 
+@login_required
 def cart(request):
-    cart_data = request.session.get('cart', {})
-    products = Product.objects.filter(id__in=cart_data.keys(), is_active=True)
-    cart_items = []
-    total = 0
-
-    for product_item in products:
-        quantity = cart_data.get(str(product_item.id), 0)
-        subtotal = product_item.price * quantity
-        total += subtotal
-        cart_items.append({
-            'product': product_item,
-            'quantity': quantity,
-            'subtotal': subtotal,
-        })
+    cart_items = Cart.objects.filter(user=request.user).select_related('product')
+    total = sum(item.total_price for item in cart_items)
 
     return render(request, 'cart.html', {
         'cart_items': cart_items,
@@ -266,38 +255,29 @@ def cart(request):
     })
 
 
+@login_required
 def checkout(request):
-    cart_data = request.session.get('cart', {})
-    products = Product.objects.filter(id__in=cart_data.keys(), is_active=True)
-    if not products:
+    cart_items = Cart.objects.filter(user=request.user).select_related('product')
+    if not cart_items.exists():
         messages.info(request, 'Your cart is empty. Add products before checking out.')
         return redirect('cart')
 
-    cart_items = []
-    total = 0
-    for product_item in products:
-        quantity = cart_data.get(str(product_item.id), 0)
-        subtotal = product_item.price * quantity
-        total += subtotal
-        cart_items.append({
-            'product': product_item,
-            'quantity': quantity,
-            'subtotal': subtotal,
-        })
+    total = sum(item.total_price for item in cart_items)
 
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            request.session['cart'] = {}
-            request.session.modified = True
+            # In a real application, you would create an Order object here.
+            # For now, we'll just clear the cart.
+            cart_items.delete()
             messages.success(request, 'Your order has been placed successfully. We will contact you soon.')
             return redirect('home')
     else:
         initial_data = {
-            'full_name': request.user.get_full_name() if request.user.is_authenticated else '',
-            'email': request.user.email if request.user.is_authenticated else '',
-            'phone': request.user.mobile_no if request.user.is_authenticated else '',
-            'address': request.user.address if request.user.is_authenticated else '',
+            'full_name': request.user.get_full_name(),
+            'email': request.user.email,
+            'phone': request.user.mobile_no,
+            'address': request.user.address,
         }
         form = CheckoutForm(initial=initial_data)
 
@@ -308,25 +288,37 @@ def checkout(request):
     })
 
 
+@login_required
 def add_to_cart(request, product_id):
-    product_item = get_object_or_404(Product, id=product_id, is_active=True)
-    cart_data = request.session.get('cart', {})
-    product_key = str(product_item.id)
-    cart_data[product_key] = cart_data.get(product_key, 0) + 1
-    request.session['cart'] = cart_data
-    request.session.modified = True
-    messages.success(request, f'{product_item.name} added to cart.')
-    return redirect(request.POST.get('next') or 'product')
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    cart_item, created = Cart.objects.get_or_create(
+        user=request.user,
+        product=product,
+    )
+
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+        messages.success(request, f'Quantity of {product.name} updated in your cart.')
+    else:
+        messages.success(request, f'{product.name} added to your cart.')
+
+    return redirect(request.POST.get('next') or 'cart')
 
 
+@login_required
 def buy_now(request, product_id):
-    product_item = get_object_or_404(Product, id=product_id, is_active=True)
-    cart_data = request.session.get('cart', {})
-    product_key = str(product_item.id)
-    cart_data[product_key] = cart_data.get(product_key, 0) + 1
-    request.session['cart'] = cart_data
-    request.session.modified = True
-    messages.success(request, f'{product_item.name} is ready to buy.')
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    cart_item, created = Cart.objects.get_or_create(
+        user=request.user,
+        product=product
+    )
+
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    messages.success(request, f'{product.name} is ready to buy.')
     return redirect('cart')
 
 

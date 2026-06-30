@@ -1,10 +1,10 @@
 .site-logo {
     width: 132px;
-    height: 42px;
+    height:60px;
     object-fit: contain;
     border-radius: 6px;
-    background: #ffffff;
-    padding: 3px 8px;
+    /* background: #ffffff; */
+    padding: 5px 8px;
 }
 
 .page-poster {
