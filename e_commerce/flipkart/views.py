@@ -360,7 +360,7 @@ def my_profile(request):
     return render(request, 'my_profile.html')
 
 
-@login_required
+@login_required(login_url='login')
 def my_orders(request):
     orders = Order.objects.filter(user=request.user).prefetch_related('items__product')
     return render(request, 'my_orders.html', {'orders': orders})
