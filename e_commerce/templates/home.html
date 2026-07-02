@@ -3,7 +3,32 @@
 
 {% block title %}Home | Flipkart Pro{% endblock %}
 
-{% block page_poster %}{% endblock %}
+{% block page_poster %}
+<section class="home-hero mb-5">
+    <div class="container">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-6">
+                <div class="hero-label">Flipkart Pro</div>
+                <h1 class="hero-title">Smart shopping with latest deals and trusted brands.</h1>
+                <p class="hero-copy">Discover curated categories, flash offers, and premium products in one elegant store. Built for speed, style, and seamless browsing.</p>
+                <div class="hero-actions mt-4 d-flex flex-column flex-sm-row gap-3">
+                    <a href="{% url 'product' %}" class="btn btn-primary btn-lg px-4">Shop Products</a>
+                    <a href="{% url 'category' %}" class="btn btn-outline-light btn-lg px-4">Explore Categories</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image shadow-lg rounded-4 overflow-hidden">
+                    {% if slider_images and slider_images|length > 0 %}
+                        <img src="{{ slider_images.0.image.url }}" alt="Shop hero" class="img-fluid w-100">
+                    {% else %}
+                        <div class="hero-image-placeholder">Your shop, reimagined.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">

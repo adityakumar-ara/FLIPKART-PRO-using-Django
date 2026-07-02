@@ -4,7 +4,7 @@
         <div class="card product-card h-100 border-0 shadow-sm">
             <div class="product-image-wrap">
                 {% if product.image %}
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <a href="{% url 'product_detail' product.id  %}"><img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}"></a>
                 {% else %}
                 <div class="product-image-placeholder">No Image</div>
                 {% endif %}
@@ -12,19 +12,25 @@
                     <form method="post" action="{% url 'add_to_cart' product.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
-                        <button type="submit" class="btn btn-light product-icon-btn" title="Add to cart" aria-label="Add {{ product.name }} to cart">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 5H14.5a.5.5 0 0 1 .49.598l-1 5A.5.5 0 0 1 13.5 11H4a.5.5 0 0 1-.485-.379L1.61 2H.5a.5.5 0 0 1-.5-.5z"/>
-                                <path d="M5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm7 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                        <button type="submit" class="btn btn-light product-icon-btn" title="Add to cart"
+                            aria-label="Add {{ product.name }} to cart">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                                viewBox="0 0 16 16" aria-hidden="true">
+                                <path
+                                    d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 5H14.5a.5.5 0 0 1 .49.598l-1 5A.5.5 0 0 1 13.5 11H4a.5.5 0 0 1-.485-.379L1.61 2H.5a.5.5 0 0 1-.5-.5z" />
+                                <path d="M5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm7 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
                             </svg>
                         </button>
                     </form>
 
                     <form method="post" action="{% url 'buy_now' product.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary product-icon-btn" title="Buy now" aria-label="Buy {{ product.name }} now">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                <path d="M11.5 4v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m0 6.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
+                        <button type="submit" class="btn btn-primary product-icon-btn" title="Buy now"
+                            aria-label="Buy {{ product.name }} now">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                viewBox="0 0 16 16" aria-hidden="true">
+                                <path
+                                    d="M11.5 4v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m0 6.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132" />
                             </svg>
                         </button>
                     </form>

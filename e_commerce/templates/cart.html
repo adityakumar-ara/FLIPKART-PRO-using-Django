@@ -6,36 +6,29 @@
 {% block poster_subtitle %}Review your selected products before placing the order.{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-center justify-content-between flex-column flex-md-row mb-4 gap-3">
     <div>
         <h1 class="h3 fw-bold mb-1">My Cart</h1>
-        <p class="text-muted mb-0">Products added from the shopping pages.</p>
+        <p class="text-muted mb-0">Review your selected products before checkout.</p>
     </div>
-    <a href="{% url 'product' %}" class="btn btn-outline-primary">Continue Shopping</a>
+    <a href="{% url 'product' %}" class="btn btn-outline-primary btn-lg">Continue Shopping</a>
 </div>
 
 {% if cart_items %}
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="list-group shadow-sm">
+            <div class="cart-list shadow-sm rounded-4 bg-white border border-1 border-gray-light p-3">
                 {% for item in cart_items %}
-                    <div class="list-group-item p-3">
-                        <div class="d-flex gap-3">
-                            <img
-                                src="{{ item.product.image.url }}"
-                                class="rounded object-fit-cover"
-                                width="96"
-                                height="96"
-                                alt="{{ item.product.name }}">
-                            <div class="flex-grow-1">
-                                <h2 class="h6 fw-semibold mb-1">{{ item.product.name }}</h2>
-                                <p class="text-muted small mb-2">{{ item.product.category }}</p>
-                                <div class="d-flex align-items-center justify-content-between gap-3">
-                                    <span>Qty: {{ item.quantity }}</span>
-                                    <strong>₹{{ item.total_price }}</strong>
-                                </div>
+                    <div class="cart-item d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 p-3 mb-3 rounded-4 border border-1 border-gray-light">
+                        <img src="{{ item.product.image.url }}" class="cart-item-image rounded-4" alt="{{ item.product.name }}">
+                        <div class="flex-grow-1">
+                            <h2 class="h6 fw-semibold mb-1">{{ item.product.name }}</h2>
+                            <p class="text-muted small mb-2">{{ item.product.category }}</p>
+                            <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
+                                <span class="badge bg-primary-soft text-primary">Qty: {{ item.quantity }}</span>
+                                <span class="fw-semibold">₹{{ item.total_price }}</span>
                             </div>
-                            <a href="{% url 'delete_card' item.product.id %}">Delete 🗑️</a>
+                            <a href="{% url 'delete_card' item.product.id %}" class="text-danger small">Remove item</a>
                         </div>
                     </div>
                 {% endfor %}
@@ -43,14 +36,22 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h2 class="h5 fw-semibold mb-3">Price Details</h2>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Total</span>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-semibold mb-3">Order Summary</h2>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Subtotal</span>
                         <strong>₹{{ total }}</strong>
                     </div>
-                    <a href="{% url 'checkout' %}" class="btn btn-warning w-100 fw-semibold mt-3">Place Order</a>
+                    <div class="d-flex justify-content-between mb-3 text-muted small">
+                        <span>Tax & charges</span>
+                        <span>Included</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-top pt-3">
+                        <span class="fw-semibold">Total</span>
+                        <strong class="fs-5">₹{{ total }}</strong>
+                    </div>
+                    <a href="{% url 'checkout' %}" class="btn btn-primary btn-lg w-100">Proceed to Checkout</a>
                 </div>
             </div>
         </div>
