@@ -270,10 +270,12 @@ def checkout(request):
         return redirect('cart')
 
     total = sum(item.total_price for item in cart_items)
+    razorpay_key = getattr(settings, 'RAZORPAY_API_KEY', '')
 
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
+            payment_id = request.POST.get('razorpay_payment_id')
             order = Order.objects.create(
                 user=request.user,
                 full_name=form.cleaned_data['full_name'],
@@ -287,6 +289,7 @@ def checkout(request):
                 payment_method=form.cleaned_data['payment_method'],
                 order_notes=form.cleaned_data['order_notes'],
                 total_amount=total,
+                status='processing' if payment_id else 'pending',
             )
             order_items = [
                 OrderItem(
@@ -315,6 +318,7 @@ def checkout(request):
         'form': form,
         'cart_items': cart_items,
         'total': total,
+        'razorpay_key': razorpay_key,
     })
 
 
@@ -336,7 +340,7 @@ def add_to_cart(request, product_id):
     return redirect(request.POST.get('next') or 'cart')
 
 
-@login_required
+@login_required(login_url='login')
 def buy_now(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
     cart_item, created = Cart.objects.get_or_create(

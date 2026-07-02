@@ -133,3 +133,6 @@ EMAIL_HOST_USER = 'flipkartsupport1@gmail.com'
 EMAIL_HOST_PASSWORD = 'xeywwgrbvpgqyjrz'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+RAZORPAY_API_KEY = 'rzp_test_T7vUcjTg0kuDOn'
+RAZORPAY_API_SECRET = 'FAs1T30tm7oCZ2nOUYjKg7Ug'
+
