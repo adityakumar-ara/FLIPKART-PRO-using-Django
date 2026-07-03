@@ -372,10 +372,12 @@ def logout_view(request):
     return redirect('home')
 
 
-def send_registration_otp(email, otp):
+def send_otp(email, otp, subject, body_template):
+    """Sends an OTP email with a given subject and body template."""
+    message = body_template.format(otp=otp)
     send_mail(
-        'Verify your Flipkart Pro email',
-        f'Your Flipkart Pro registration OTP is {otp}.',
+        subject,
+        message,
         settings.DEFAULT_FROM_EMAIL,
         [email],
         fail_silently=False,
@@ -422,7 +424,12 @@ def register(request):
         }
 
         try:
-            send_registration_otp(email, otp)
+            send_otp(
+                email,
+                otp,
+                'Verify your Flipkart Pro email',
+                'Your Flipkart Pro registration OTP is {otp}.'
+            )
         except Exception as error:
             error_message = 'Could not send OTP email. Please check SMTP settings and try again.'
             if settings.DEBUG:
@@ -509,6 +516,82 @@ def login_view(request):
     return render(request, 'login.html')
 
 
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        if not email:
+            messages.error(request, 'Please enter your email address.')
+            return render(request, 'forgot_password.html')
+
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            messages.error(request, 'No user found with this email address.')
+            return render(request, 'forgot_password.html')
+
+        otp = str(random.randint(100000, 999999))
+        request.session['reset_password'] = {
+            'email': email,
+            'otp': otp,
+        }
+
+        try:
+            send_otp(
+                email,
+                otp,
+                'Reset Your Flipkart Pro Password',
+                'Your OTP to reset your password is {otp}.'
+            )
+        except Exception as error:
+            error_message = 'Could not send OTP email. Please check SMTP settings and try again.'
+            if settings.DEBUG:
+                error_message = f'{error_message} Error: {error}'
+            messages.error(request, error_message)
+            return render(request, 'forgot_password.html')
+
+        messages.success(request, 'An OTP has been sent to your email to reset your password.')
+        return redirect('reset_password_with_otp')
+
+    return render(request, 'forgot_password.html')
+
+
+def reset_password_with_otp(request):
+    reset_session = request.session.get('reset_password')
+    if not reset_session:
+        messages.error(request, 'Invalid session. Please start the forgot password process again.')
+        return redirect('forgot_password')
+
+    if request.method == 'POST':
+        otp = request.POST.get('otp', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        if not all([otp, password, confirm_password]):
+            messages.error(request, 'Please fill all fields.')
+            return render(request, 'reset_password_with_otp.html', {'email': reset_session['email']})
+
+        if otp != reset_session['otp']:
+            messages.error(request, 'Invalid OTP.')
+            return render(request, 'reset_password_with_otp.html', {'email': reset_session['email']})
+
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'reset_password_with_otp.html', {'email': reset_session['email']})
+
+        try:
+            user = CustomUser.objects.get(email=reset_session['email'])
+            user.set_password(password)
+            user.save()
+            request.session.pop('reset_password', None)
+            messages.success(request, 'Your password has been reset successfully. Please login.')
+            return redirect('login')
+        except CustomUser.DoesNotExist:
+            messages.error(request, 'An unexpected error occurred. Please try again.')
+            return redirect('forgot_password')
+
+    return render(request, 'reset_password_with_otp.html', {'email': reset_session['email']})
+
+
 def quick_links(request):
     return render(request, 'quick_links.html')
 
@@ -537,7 +620,7 @@ def our_vision(request):
     return render(request, 'our_vision.html')
 
 
-@login_required
+@login_required(login_url='login')
 def edit_profile(request):
     user = request.user
     form_class = modelform_factory(
