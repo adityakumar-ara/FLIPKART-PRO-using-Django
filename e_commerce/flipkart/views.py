@@ -5,12 +5,12 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Cart, Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact, Order, OrderItem
-from .forms import CheckoutForm
+from .models import Cart, Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact, Order, OrderItem, Review
+from .forms import CheckoutForm, ReviewForm
 from django.forms import modelform_factory, TextInput, EmailInput, DateInput, Textarea, Select
 from django.contrib.auth.decorators import login_required
 
@@ -24,7 +24,9 @@ def get_categories_with_products(subcategory_name_filter=None, product_name_filt
     product_qs = Product.objects.filter(is_active=True)
 
     if product_name_filter:
-        product_qs = product_qs.filter(name__icontains=product_name_filter)
+        product_qs = product_qs.filter(
+            Q(name__icontains=product_name_filter) | Q(sku__icontains=product_name_filter)
+        )
 
     if product_price_filter:
         if product_price_filter == "0-500":
@@ -101,7 +103,9 @@ def product(request):
         )
 
         if product_name_filter:
-            uncategorized_products_qs = uncategorized_products_qs.filter(name__icontains=product_name_filter)
+            uncategorized_products_qs = uncategorized_products_qs.filter(
+                Q(name__icontains=product_name_filter) | Q(sku__icontains=product_name_filter)
+            )
         if product_price_filter:
             if price_filter == "0-500":
                 uncategorized_products_qs = uncategorized_products_qs.filter(price__gte=0, price__lte=500)
@@ -159,7 +163,9 @@ def subcategory_products(request, subcategory_id):
 
     # Apply filters
     if search_query:
-        products_list = products_list.filter(name__icontains=search_query)
+        products_list = products_list.filter(
+            Q(name__icontains=search_query) | Q(sku__icontains=search_query)
+        )
 
     if price_filter:
         if price_filter == "0-500":
@@ -199,8 +205,34 @@ def subcategory_products(request, subcategory_id):
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
-    # You could also fetch related or similar products here to display on the page
-    return render(request, 'product_detail.html', {'product': product})
+    reviews = product.reviews.filter(status='approved')
+    user_has_reviewed = False
+
+    if request.user.is_authenticated:
+        user_has_reviewed = Review.objects.filter(product=product, user=request.user).exists()
+
+    if request.method == 'POST' and request.user.is_authenticated and not user_has_reviewed:
+        review_form = ReviewForm(request.POST)
+        if review_form.is_valid():
+            # Optional: Check if the user has purchased the product before allowing a review.
+            # has_purchased = Order.objects.filter(user=request.user, items__product=product, status='completed').exists()
+            # if not has_purchased:
+            #     messages.error(request, "You can only review products you have purchased.")
+            #     return redirect('product_detail', product_id=product.id)
+            
+            review = review_form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            messages.success(request, 'Your review has been submitted and is pending approval.')
+            return redirect('product_detail', product_id=product.id)
+    else:
+        review_form = ReviewForm()
+
+    context = {
+        'product': product, 'reviews': reviews, 'review_form': review_form, 'user_has_reviewed': user_has_reviewed,
+    }
+    return render(request, 'product_detail.html', context)
 
 
 def gallery(request):
@@ -257,10 +289,10 @@ def cart(request):
 @login_required
 def delete_cart(request, product_id):
     cart_items = Cart.objects.filter(user=request.user, product_id=product_id)
-    cart_items.delete()
+    if cart_items.exists():
+        cart_items.delete()
+        messages.success(request, "Item removed from your cart.")
     return redirect('cart')
-    
-    return render(request, 'cart.html')
 
 @login_required
 def checkout(request):
@@ -325,17 +357,37 @@ def checkout(request):
 @login_required
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
+
+    try:
+        quantity_to_add = int(request.POST.get('quantity', 1))
+        if quantity_to_add < 1:
+            quantity_to_add = 1
+    except (ValueError, TypeError):
+        quantity_to_add = 1
+
     cart_item, created = Cart.objects.get_or_create(
         user=request.user,
         product=product,
+        defaults={'quantity': 0}  # Start with 0 and add to it
     )
 
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-        messages.success(request, f'Quantity of {product.name} updated in your cart.')
+    new_quantity = cart_item.quantity + quantity_to_add
+
+    if new_quantity > product.stock:
+        available_to_add = product.stock - cart_item.quantity
+        if available_to_add > 0:
+            messages.warning(request, f"You can only add {available_to_add} more of {product.name}. Stock is limited.")
+        else:
+            messages.warning(request, f"Your cart already contains the maximum available stock for {product.name}.")
+        return redirect(request.POST.get('next') or 'cart')
+
+    cart_item.quantity = new_quantity
+    cart_item.save()
+
+    if cart_item.quantity == quantity_to_add:  # This implies it was newly created or was 0
+        messages.success(request, f'Added {quantity_to_add} of {product.name} to your cart.')
     else:
-        messages.success(request, f'{product.name} added to your cart.')
+        messages.success(request, f'Updated quantity for {product.name}. You now have {new_quantity} in your cart.')
 
     return redirect(request.POST.get('next') or 'cart')
 
@@ -343,17 +395,25 @@ def add_to_cart(request, product_id):
 @login_required(login_url='login')
 def buy_now(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
-    cart_item, created = Cart.objects.get_or_create(
-        user=request.user,
-        product=product
-    )
-
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-
-    messages.success(request, f'{product.name} is ready to buy.')
-    return redirect('cart')
+    if request.method != 'POST':
+        return redirect('product_detail', product_id=product.id)
+    try:
+        quantity = int(request.POST.get('quantity', 1))
+        if quantity < 1:
+            quantity = 1
+    except (ValueError, TypeError):
+        quantity = 1
+    if product.stock < quantity:
+        messages.error(request, f"Not enough stock for {product.name}. Only {product.stock} available.")
+        return redirect('product_detail', product_id=product.id)
+    # "Buy Now" should set the quantity in the cart, not add to it.
+    cart_item, created = Cart.objects.update_or_create(
+        user=request.user, product=product, defaults={'quantity': quantity})
+    if created:
+        messages.success(request, f'Added {quantity} of {product.name} to cart. Proceeding to checkout.')
+    else:
+        messages.info(request, f'Cart updated with {quantity} of {product.name}. Proceeding to checkout.')
+    return redirect('checkout')
 
 
 def my_profile(request):
