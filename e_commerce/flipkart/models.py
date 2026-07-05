@@ -84,6 +84,7 @@ class Announcement(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=150)
+    sku = models.CharField(max_length=100, unique=True, blank=True, null=True, help_text="Stock Keeping Unit")
     category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to='product_images/')
@@ -94,6 +95,12 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        return self.display_name
+
+    @property
+    def display_name(self):
+        if self.sku:
+            return f"{self.name} ({self.sku})"
         return self.name
 
 
@@ -115,6 +122,29 @@ class Cart(models.Model):
     @property
     def total_price(self):
         return self.quantity * self.product.price
+
+
+class Review(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+    RATING_CHOICES = ((1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'))
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField(choices=RATING_CHOICES)
+    comment = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('product', 'user')
+
+    def __str__(self):
+        return f"Review for {self.product.name} by {self.user.username}"
 
 
 class Order(models.Model):
