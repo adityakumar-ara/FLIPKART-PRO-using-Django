@@ -1,5 +1,6 @@
 from django import forms
 
+from .models import Review
 
 class CheckoutForm(forms.Form):
     full_name = forms.CharField(
@@ -54,3 +55,13 @@ class CheckoutForm(forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Order notes (optional)'}),
         label='Order notes',
     )
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.Select(attrs={'class': 'form-select'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Share your thoughts on this product...'}),
+        }
