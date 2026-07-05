@@ -12,6 +12,7 @@
                     <form method="post" action="{% url 'add_to_cart' product.id %}">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.path }}">
+                        <input type="hidden" name="quantity" value="1">
                         <button type="submit" class="btn btn-light product-icon-btn" title="Add to cart"
                             aria-label="Add {{ product.name }} to cart">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
@@ -25,6 +26,7 @@
 
                     <form method="post" action="{% url 'buy_now' product.id %}">
                         {% csrf_token %}
+                        <input type="hidden" name="quantity" value="1">
                         <button type="submit" class="btn btn-primary product-icon-btn" title="Buy now"
                             aria-label="Buy {{ product.name }} now">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -55,6 +57,7 @@
                         {% endif %}
                         <form method="post" action="{% url 'buy_now' product.id %}">
                             {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
                             <button type="submit" class="btn btn-sm btn-warning fw-semibold">Buy Now</button>
                         </form>
                     </div>
