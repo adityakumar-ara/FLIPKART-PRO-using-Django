@@ -5,12 +5,12 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, Avg, Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import Cart, Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact, Order, OrderItem, Review
-from .forms import CheckoutForm, ReviewForm
+from .models import Cart, Category, SubCategory, CustomUser, Product, sliderImage, TeamMember, Gallery, Contact, Order, OrderItem, ProductHelpRequest, Review
+from .forms import CheckoutForm, ProductHelpRequestForm, ReviewForm
 from django.forms import modelform_factory, TextInput, EmailInput, DateInput, Textarea, Select
 from django.contrib.auth.decorators import login_required
 
@@ -72,7 +72,7 @@ def home(request):
         'categories': categories,
         'top_products': top_products,
     })
-
+    
 
 def product(request):
     all_categories = Category.objects.filter(is_active=True).order_by('name')
@@ -229,10 +229,49 @@ def product_detail(request, product_id):
     else:
         review_form = ReviewForm()
 
+    review_stats = reviews.aggregate(avg_rating=Avg('rating'), total_reviews=Count('id'))
+    total_reviews = review_stats['total_reviews'] or 0
+    distribution_map = {rating: 0 for rating in range(5, 0, -1)}
+    for item in reviews.values('rating').annotate(count=Count('rating')).order_by('-rating'):
+        distribution_map[item['rating']] = item['count']
+    rating_distribution = [
+        {
+            'rating': rating,
+            'count': distribution_map[rating],
+            'width_percent': round((distribution_map[rating] / total_reviews) * 100) if total_reviews else 0,
+        }
+        for rating in range(5, 0, -1)
+    ]
+
     context = {
-        'product': product, 'reviews': reviews, 'review_form': review_form, 'user_has_reviewed': user_has_reviewed,
+        'product': product,
+        'reviews': reviews,
+        'review_form': review_form,
+        'user_has_reviewed': user_has_reviewed,
+        'avg_rating': review_stats['avg_rating'] or 0,
+        'total_reviews': review_stats['total_reviews'],
+        'rating_distribution': rating_distribution,
+        'star_range': range(1, 6),
     }
     return render(request, 'product_detail.html', context)
+
+
+def submit_product_help_request(request, product_id):
+    if request.method != 'POST':
+        return redirect('product_detail', product_id=product_id)
+
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    form = ProductHelpRequestForm(request.POST)
+    if form.is_valid():
+        help_request = form.save(commit=False)
+        help_request.product = product
+        if request.user.is_authenticated:
+            help_request.user = request.user
+        help_request.save()
+        messages.success(request, 'Your support request has been sent. We will get back to you soon.')
+    else:
+        messages.error(request, 'Please describe how we can help before submitting your request.')
+    return redirect('product_detail', product_id=product.id)
 
 
 def gallery(request):
@@ -275,8 +314,7 @@ def contact_us(request):
 def wishlist(request):
     return render(request, 'wishlist.html')
 
-
-@login_required
+@login_required(login_url='login')
 def cart(request):
     cart_items = Cart.objects.filter(user=request.user).select_related('product')
     total = sum(item.total_price for item in cart_items)
@@ -286,7 +324,7 @@ def cart(request):
         'total': total,
     })
 
-@login_required
+@login_required(login_url='login')
 def delete_cart(request, product_id):
     cart_items = Cart.objects.filter(user=request.user, product_id=product_id)
     if cart_items.exists():
@@ -294,7 +332,7 @@ def delete_cart(request, product_id):
         messages.success(request, "Item removed from your cart.")
     return redirect('cart')
 
-@login_required
+@login_required(login_url='login')
 def checkout(request):
     cart_items = Cart.objects.filter(user=request.user).select_related('product')
     if not cart_items.exists():
@@ -354,7 +392,7 @@ def checkout(request):
     })
 
 
-@login_required
+@login_required(login_url='login')
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
 

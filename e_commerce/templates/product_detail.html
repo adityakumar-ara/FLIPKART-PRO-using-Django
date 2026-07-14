@@ -50,14 +50,74 @@
                 </form>
                 {% endif %}
             </div>
+
+            <button type="button" class="need-help-btn" id="open-need-help-modal" aria-haspopup="dialog" aria-controls="need-help-modal">
+                <span aria-hidden="true">?</span>
+                <span class="visually-hidden">Need help with {{ product.name }}</span>
+            </button>
         </div>
     </div>
+
+    <div class="need-help-backdrop" id="need-help-backdrop"></div>
+    <section class="need-help-modal" id="need-help-modal" role="dialog" aria-modal="true" aria-labelledby="need-help-title" aria-hidden="true">
+        <div class="need-help-modal-header">
+            <h2 class="need-help-modal-title" id="need-help-title">Need help?</h2>
+            <button type="button" class="need-help-modal-close" id="close-need-help-modal" aria-label="Close support form">&times;</button>
+        </div>
+        <form action="{% url 'submit_product_help_request' product.id %}" method="post">
+            {% csrf_token %}
+            <div class="need-help-modal-body">
+                <div class="need-help-form-group">
+                    <label for="help-product-name">Product name</label>
+                    <input id="help-product-name" type="text" value="{{ product.name }}" readonly>
+                </div>
+                <div class="need-help-form-group mb-0">
+                    <label for="id_query">Your query</label>
+                    <textarea id="id_query" name="query" rows="5" required placeholder="Tell us how we can help with this product..."></textarea>
+                </div>
+            </div>
+            <div class="need-help-modal-footer">
+                <button type="button" class="btn-cancel-help" id="cancel-need-help-modal">Cancel</button>
+                <button type="submit" class="btn-submit-help">Submit request</button>
+            </div>
+        </form>
+    </section>
 
     <!-- Reviews Section -->
     <div class="row mt-5">
         <div class="col-12">
-            <h2 class="mb-4">Customer Reviews ({{ reviews.count }})</h2>
-            
+            <h2 class="mb-4">Customer Reviews ({{ total_reviews }})</h2>
+
+            {% if total_reviews %}
+                <div class="product-review-summary mb-4">
+                    <div class="review-summary-panel">
+                        <div class="review-average">
+                            <span class="review-label">Average Rating</span>
+                            <div class="review-average-value">{{ avg_rating|floatformat:1 }}</div>
+                            <div class="review-average-scale">out of 5</div>
+                            <div class="review-star-list" aria-hidden="true">
+                                {% for star in star_range %}
+                                    <span class="review-star{% if star <= avg_rating|floatformat:0 %} filled{% endif %}">★</span>
+                                {% endfor %}
+                            </div>
+                            <p class="text-muted mb-0">Based on {{ total_reviews }} approved review{% if total_reviews != 1 %}s{% endif %}.</p>
+                        </div>
+
+                        <div class="rating-distribution">
+                            {% for item in rating_distribution %}
+                                <div class="rating-bar-row">
+                                    <span class="rating-label">{{ item.rating }}</span>
+                                    <div class="rating-bar-track">
+                                        <div class="rating-bar-fill" style="width: {{ item.width_percent }}%;"></div>
+                                    </div>
+                                    <span class="rating-count">{{ item.count }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
             {% if request.user.is_authenticated %}
                 {% if user_has_reviewed %}
                     <div class="alert alert-success">You have already submitted a review for this product.</div>
@@ -86,21 +146,57 @@
                 </div>
             {% endif %}
 
-            {% for review in reviews %}
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h6 class="card-subtitle mb-2 text-muted">{{ review.user.full_name }}</h6>
-                            <small class="text-muted">{{ review.created_at|date:"d M, Y" }}</small>
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="review-card mb-3">
+                        <div class="review-card-body">
+                            <div class="review-meta">
+                                <div>
+                                    <div class="review-badge">{{ review.rating }} ★</div>
+                                    <div class="review-author">{{ review.user.full_name }}</div>
+                                </div>
+                                <div class="review-date">{{ review.created_at|date:"d M, Y" }}</div>
+                            </div>
+                            <p class="review-comment">{{ review.comment|linebreaks }}</p>
                         </div>
-                        <p><strong>Rating: {{ review.rating }}/5</strong></p>
-                        <p class="card-text">{{ review.comment|linebreaks }}</p>
                     </div>
-                </div>
-            {% empty %}
-                <p>No reviews yet. Be the first to review this product!</p>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-light">No reviews yet. Be the first to review this product!</div>
+            {% endif %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (() => {
+        const openButton = document.getElementById('open-need-help-modal');
+        const modal = document.getElementById('need-help-modal');
+        const backdrop = document.getElementById('need-help-backdrop');
+        const closeButton = document.getElementById('close-need-help-modal');
+        const cancelButton = document.getElementById('cancel-need-help-modal');
+        const query = document.getElementById('id_query');
+
+        const closeModal = () => {
+            modal.classList.remove('show');
+            backdrop.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+            openButton.focus();
+        };
+        const openModal = () => {
+            modal.classList.add('show');
+            backdrop.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            query.focus();
+        };
+
+        openButton.addEventListener('click', openModal);
+        [closeButton, cancelButton, backdrop].forEach((element) => element.addEventListener('click', closeModal));
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal.classList.contains('show')) closeModal();
+        });
+    })();
+</script>
 {% endblock %}

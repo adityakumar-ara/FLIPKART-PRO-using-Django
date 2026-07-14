@@ -147,6 +147,25 @@ class Review(models.Model):
         return f"Review for {self.product.name} by {self.user.username}"
 
 
+class ProductHelpRequest(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='help_requests')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='product_help_requests',
+        blank=True,
+        null=True,
+    )
+    query = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Help request for {self.product.name}"
+
+
 class Order(models.Model):
     PAYMENT_METHOD_CHOICES = (
         ('cod', 'Cash on Delivery'),

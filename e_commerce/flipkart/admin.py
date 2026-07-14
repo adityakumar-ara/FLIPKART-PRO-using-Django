@@ -126,6 +126,14 @@ class ReviewAdmin(admin.ModelAdmin):
     reject_reviews.short_description = "Mark selected reviews as Rejected"
 
 
+@admin.register(ProductHelpRequest)
+class ProductHelpRequestAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('product__name', 'user__username', 'query')
+    readonly_fields = ('created_at',)
+
+
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'phone', 'subject', 'created_at')

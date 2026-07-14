@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Review
+from .models import ProductHelpRequest, Review
 
 class CheckoutForm(forms.Form):
     full_name = forms.CharField(
@@ -64,4 +64,16 @@ class ReviewForm(forms.ModelForm):
         widgets = {
             'rating': forms.Select(attrs={'class': 'form-select'}),
             'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Share your thoughts on this product...'}),
+        }
+
+
+class ProductHelpRequestForm(forms.ModelForm):
+    class Meta:
+        model = ProductHelpRequest
+        fields = ['query']
+        widgets = {
+            'query': forms.Textarea(attrs={
+                'rows': 5,
+                'placeholder': 'Tell us how we can help with this product...',
+            }),
         }
